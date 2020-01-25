@@ -77,6 +77,7 @@ public class XBot1 extends LinearOpMode {
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Motors", "lf (%.2f), rf (%.2f), lb (%.2f), rb (%.2f)", lfP, rfP, lbP, rbP);
+            telemetry.addLine("Bla bla bla");
             telemetry.update();
         }
     }
