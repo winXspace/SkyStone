@@ -4,10 +4,11 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-@TeleOp(name="HoloX", group="andrew")
+@TeleOp(name="XBot1", group="andrew")
 
 public class XBot1 extends LinearOpMode {
 
@@ -18,33 +19,60 @@ public class XBot1 extends LinearOpMode {
     private DcMotor lbDrive = null;
     private DcMotor rbDrive = null;
 
+    private DcMotor ilDrive = null;
+    private DcMotor irDrive = null;
+
     private VectorF lf = new VectorF (1.0f, 1.0f);
-    private VectorF rf = new VectorF (-1.0f, 1.0f);
-    private VectorF lb = new VectorF (1.0f, -1.0f);
+    private VectorF rf = new VectorF (1.0f, -1.0f);
+    private VectorF lb = new VectorF (-1.0f, 1.0f);
     private VectorF rb = new VectorF (-1.0f, -1.0f);
+
+
+
 
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
-        lfDrive  = hardwareMap.get(DcMotor.class, "lfDrive");
-        rfDrive = hardwareMap.get(DcMotor.class, "rfDrive");
+        lfDrive = hardwareMap.get(DcMotor.class, "m10");
+        rfDrive = hardwareMap.get(DcMotor.class, "m11");
 
-        lbDrive  = hardwareMap.get(DcMotor.class, "lbDrive");
-        rbDrive = hardwareMap.get(DcMotor.class, "rbDrive");
+        lbDrive = hardwareMap.get(DcMotor.class, "m12");
+        rbDrive = hardwareMap.get(DcMotor.class, "m13");
 
-        lfDrive.setDirection(DcMotor.Direction.FORWARD);
-        lbDrive.setDirection(DcMotor.Direction.FORWARD);
+        lfDrive.setDirection(DcMotor.Direction.REVERSE);
+        lbDrive.setDirection(DcMotor.Direction.REVERSE);
 
-        rfDrive.setDirection(DcMotor.Direction.FORWARD);
-        rbDrive.setDirection(DcMotor.Direction.FORWARD);
+        rfDrive.setDirection(DcMotor.Direction.REVERSE);
+        rbDrive.setDirection(DcMotor.Direction.REVERSE);
+
+
+        // intake
+        ilDrive = hardwareMap.get(DcMotor.class, "m20");
+        irDrive = hardwareMap.get(DcMotor.class, "m21");
+
+        ilDrive.setDirection(DcMotor.Direction.REVERSE);
+        irDrive.setDirection(DcMotor.Direction.FORWARD);
+
+
+
 
         waitForStart();
         runtime.reset();
 
         while (opModeIsActive()) {
 
+            // intake
+            float intakeUp = gamepad1.left_bumper ? 1 : 0;
+            float intakeDown = gamepad1.right_bumper ? -1 : 0;
+            float intake = intakeUp + intakeDown;
+
+            ilDrive.setPower(intake);
+            irDrive.setPower(intake);
+
+
+            // movement
             float rot = gamepad1.right_stick_x;
 
 
@@ -54,12 +82,6 @@ public class XBot1 extends LinearOpMode {
             float rfP = steering.dotProduct(rf) + rot;
             float lbP = steering.dotProduct(lb) + rot;
             float rbP = steering.dotProduct(rb) + rot;
-
-            // float lfP = lf.dotProduct(steering) + rot;
-            // float rfP = rf.dotProduct(steering) + rot;
-            // float lbP = lb.dotProduct(steering) + rot;
-            // float rbP = rb.dotProduct(steering) + rot;
-
 
 
             lfP = Range.clip(lfP, -1.0f, 1.0f) ;
@@ -77,7 +99,6 @@ public class XBot1 extends LinearOpMode {
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Motors", "lf (%.2f), rf (%.2f), lb (%.2f), rb (%.2f)", lfP, rfP, lbP, rbP);
-            telemetry.addLine("Bla bla bla by Idr");
             telemetry.update();
         }
     }
