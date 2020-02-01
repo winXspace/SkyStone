@@ -21,10 +21,10 @@ class XBot() : LinearOpMode() {
         telemetry.update()
 
         val robo : List<Data> = listOf(
-                Data(hardwareMap.get(DcMotor::class.java , "lfDrive"), VectorF(1f, 1f)),
-                Data(hardwareMap.get(DcMotor::class.java , "rfDrive"), VectorF(-1f, 1f)),
-                Data(hardwareMap.get(DcMotor::class.java , "lbDrive"), VectorF(1f, -1f)),
-                Data(hardwareMap.get(DcMotor::class.java , "rbDrive"), VectorF(-1f, -1f))
+                Data(hardwareMap.get(DcMotor::class.java , "m10"), VectorF(1f, 1f)),
+                Data(hardwareMap.get(DcMotor::class.java , "m11"), VectorF(1f, -1f)),
+                Data(hardwareMap.get(DcMotor::class.java , "m12"), VectorF(-1f, 1f)),
+                Data(hardwareMap.get(DcMotor::class.java , "m13"), VectorF(-1f, -1f))
         )
 
         robo.onEach { (motor) -> motor.direction = DcMotorSimple.Direction.FORWARD }
