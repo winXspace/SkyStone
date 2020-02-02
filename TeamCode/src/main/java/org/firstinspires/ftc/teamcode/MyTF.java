@@ -54,7 +54,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.YZX;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
 
 @Autonomous(name = "Test: TF Detection", group = "andrew")
-@Disabled
+
 public class MyTF extends LinearOpMode {
     private static final String TFOD_MODEL_ASSET = "Skystone.tflite";
     private static final String LABEL_FIRST_ELEMENT = "Stone";
@@ -71,16 +71,13 @@ public class MyTF extends LinearOpMode {
 
         initVuforia();
 
-        if (ClassFactory.getInstance().canCreateTFObjectDetector()) {
+        // DEBUG
+        if ( true && ClassFactory.getInstance().canCreateTFObjectDetector()) {
             initTfod();
         } else {
             telemetry.addData("Sorry!", "This device is not compatible with TFOD");
         }
 
-        /**
-         * Activate TensorFlow Object Detection before we wait for the start command.
-         * Do it here so that the Camera Stream window will have the TensorFlow annotations visible.
-         **/
         if (tfod != null) {
             tfod.activate();
         }
@@ -92,6 +89,7 @@ public class MyTF extends LinearOpMode {
 
         if (opModeIsActive()) {
             while (opModeIsActive()) {
+                // TF handling
                 if (tfod != null) {
                     // getUpdatedRecognitions() will return null if no new information is available since
                     // the last time that call was made.
@@ -111,6 +109,19 @@ public class MyTF extends LinearOpMode {
                       telemetry.update();
                     }
                 }
+
+
+                // Vuforia handling
+                for (VuforiaTrackable trackable : allTrackables) {
+                    telemetry.addData(trackable.getName(), ((VuforiaTrackableDefaultListener)trackable.getListener()).isVisible() ? "Visible" : "Not Visible");    //
+
+                    OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener)trackable.getListener()).getUpdatedRobotLocation();
+                    if (robotLocationTransform != null) {
+                        lastLocation = robotLocationTransform;
+                    }
+                }
+                telemetry.update();
+
             }
         }
 
@@ -150,9 +161,16 @@ public class MyTF extends LinearOpMode {
     private static final float quadField  = 36 * mmPerInch;
 
 
+
+    private List<VuforiaTrackable> allTrackables = new ArrayList<VuforiaTrackable>();
+    OpenGLMatrix lastLocation = null;
+
     private void initVuforia() {
 
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
 
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
         parameters.cameraDirection = CameraDirection.BACK;
@@ -194,7 +212,7 @@ public class MyTF extends LinearOpMode {
         rear2.setName("Rear Perimeter 2");
 
 
-        List<VuforiaTrackable> allTrackables = new ArrayList<VuforiaTrackable>();
+
         allTrackables.addAll(targetsSkyStone);
 
 
