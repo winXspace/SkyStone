@@ -102,18 +102,20 @@ public class MyTF extends LinearOpMode {
                     // the last time that call was made.
                     List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
                     if (updatedRecognitions != null) {
-                      telemetry.addData("# Object Detected", updatedRecognitions.size());
+                        // Временно закомментирую, ибо мешает смотреть лог с меток...
+                      //telemetry.addData("# Object Detected", updatedRecognitions.size());
 
                       // step through the list of recognitions and display boundary info.
                       int i = 0;
                       for (Recognition recognition : updatedRecognitions) {
+
                         telemetry.addData(String.format("label (%d)", i), recognition.getLabel());
                         telemetry.addData(String.format("  left,top (%d)", i), "%.03f , %.03f",
                                           recognition.getLeft(), recognition.getTop());
                         telemetry.addData(String.format("  right,bottom (%d)", i), "%.03f , %.03f",
                                 recognition.getRight(), recognition.getBottom());
                       }
-                      telemetry.update();
+                      //telemetry.update();
                     }
                 }
 
@@ -122,9 +124,12 @@ public class MyTF extends LinearOpMode {
                 for (VuforiaTrackable trackable : allTrackables) {
                     //telemetry.addData(trackable.getName(), ((VuforiaTrackableDefaultListener)trackable.getListener()).isVisible() ? "Visible" : "Not Visible");    //
 
-                    OpenGLMatrix robotLocationTransform = ((VuforiaTrackableDefaultListener)trackable.getListener()).getUpdatedRobotLocation();
-                    if (robotLocationTransform != null) {
-                        lastLocation = robotLocationTransform;
+                    OpenGLMatrix location = ((VuforiaTrackableDefaultListener)trackable.getListener()).getUpdatedRobotLocation();
+                    if (location!= null) {
+                        //lastLocation = robotLocationTransform;
+                        telemetry.addData(trackable.getName(), "Виден");
+                        telemetry.addData("Pos", location.formatAsTransform());
+
                     }
                 }
                 telemetry.update();
@@ -256,13 +261,38 @@ public class MyTF extends LinearOpMode {
                 .translation(quadField, -halfField, mmTargetHeight)
                 .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, 180)));
 
+
+
+
+
+        //red2.setLocation(OpenGLMatrix
+          //      .translation(-quadField, -halfField, mmTargetHeight)
+            //    .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, 180)));
+
+        // Повесим Red2 временно в центр системы координат(центр поля). Ориентация картинки - прежняя..
         red2.setLocation(OpenGLMatrix
-                .translation(-quadField, -halfField, mmTargetHeight)
+                .translation( 0, 0, mmTargetHeight)
                 .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, 180)));
 
+
+
+
+        //front1.setLocation(OpenGLMatrix
+          //      .translation(-halfField, -quadField, mmTargetHeight)
+            //    .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0 , 90)));
+
+
+
         front1.setLocation(OpenGLMatrix
-                .translation(-halfField, -quadField, mmTargetHeight)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0 , 90)));
+                .translation(0, 0, mmTargetHeight)
+                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES,
+                        90, // повернули вокруг оси X на 90 градусов, по правиу буравчика
+                        0 ,
+                        0)));
+
+
+
+
 
         front2.setLocation(OpenGLMatrix
                 .translation(-halfField, quadField, mmTargetHeight)
@@ -312,5 +342,6 @@ public class MyTF extends LinearOpMode {
 
 
     }
+
 
 }
