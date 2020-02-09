@@ -35,6 +35,7 @@ public class Namatyvanie extends LinearOpMode {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
         liftDrive = hardwareMap.get(DcMotor.class, "m20");
+        liftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         waitForStart();
         runtime.reset();
