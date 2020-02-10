@@ -60,7 +60,7 @@ public class MyTF extends LinearOpMode {
     private static final String LABEL_FIRST_ELEMENT = "Stone";
     private static final String LABEL_SECOND_ELEMENT = "Skystone";
 
-    private static final String VUFORIA_KEY = MyKeys.vuforiaKey;
+   // private static final String VUFORIA_KEY = MyKeys.vuforiaKey;
 
     private VuforiaLocalizer vuforia;
 
@@ -154,7 +154,7 @@ public class MyTF extends LinearOpMode {
 
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
 
-        parameters.vuforiaLicenseKey = VUFORIA_KEY;
+       //parameters.vuforiaLicenseKey = VUFORIA_KEY;
         parameters.cameraDirection = CameraDirection.BACK;
 
         vuforia = ClassFactory.getInstance().createVuforia(parameters);

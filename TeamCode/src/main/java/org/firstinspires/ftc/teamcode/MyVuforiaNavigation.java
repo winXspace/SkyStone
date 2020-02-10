@@ -50,7 +50,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.firstinspires.ftc.teamcode.MyKeys;
+//import org.firstinspires.ftc.teamcode.MyKeys;
 
 
 @Autonomous(name="Concept: Vuforia Navigation!", group ="Concept")
@@ -68,7 +68,7 @@ public class MyVuforiaNavigation extends LinearOpMode {
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
 
-        parameters.vuforiaLicenseKey = MyKeys.vuforiaKey;
+        //parameters.vuforiaLicenseKey = MyKeys.vuforiaKey;
 
         parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
 
