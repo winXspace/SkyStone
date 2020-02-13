@@ -13,7 +13,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 public class XBot1 extends LinearOpMode {
     Servo servo;
-    double servoPosition = 0.0;
+    double servoPosition = 0.5;
 
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor lfDrive = null;
@@ -116,7 +116,7 @@ public class XBot1 extends LinearOpMode {
             float rot = gamepad1.right_stick_x;
 
 
-            VectorF steering = new VectorF(gamepad1.left_stick_x, -gamepad1.left_stick_y);// На геймпаде по-дефолту Y-ось с мотрит вниз. Здесь мы делаем наверх...
+            VectorF steering = new VectorF(-gamepad1.left_stick_x, -gamepad1.left_stick_y);// На геймпаде по-дефолту Y-ось с мотрит вниз. Здесь мы делаем наверх...
 
             float lfP = steering.dotProduct(lf) + rot;
             float rfP = steering.dotProduct(rf) + rot;
