@@ -23,6 +23,8 @@ class Data{
 public class Bot {
     private static Bot bot;
     private final DcMotor liftDrive;
+    private ArrayList<Data> chassis;
+    private ArrayList<DcMotor> intake;
 
     public static Bot getInstance(HardwareMap hardwareMap){
         if (bot == null){
@@ -30,7 +32,7 @@ public class Bot {
         }
         return bot;
     }
-    private ArrayList<Data> chassis;
+
     private Bot(HardwareMap hardwareMap){
         // chassis
         chassis = new ArrayList<>(
@@ -51,13 +53,17 @@ public class Bot {
         liftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // intake
-        //ilDrive = hardwareMap.get(DcMotor.class, "m20");
-        //irDrive = hardwareMap.get(DcMotor.class, "m21");
+        intake = new ArrayList<>();
+        intake.add(hardwareMap.get(DcMotor.class, "m21"));
+        intake.add(hardwareMap.get(DcMotor.class, "m22"));
 
     }
 
-    public void go(VectorF steering3d){
-        VectorF steering = new VectorF(steering3d.get(0), steering3d.get(1));
+    /**
+     * Motion of robot in desired direction
+     * @param steering should be 2d vector(not 3d)!
+     */
+    public void go(VectorF steering){
         for(Data d : chassis){
             float p = steering.dotProduct(d.dir);
             p *= 0.2;// ATTENTION: намеренно уменьшаем скорость в целях дебага... TODO: убрать эту строчку
@@ -70,6 +76,18 @@ public class Bot {
     public void stop() {
         for(Data d : chassis){
             d.motor.setPower(0);
+        }
+    }
+
+    // lifting the brick
+    public void lift(double p){
+        liftDrive.setPower(Range.clip(p, -1.0f, 1.0f));
+    }
+
+    // taking or freeing the brick to/from intake
+    public void take(double p){
+        for(DcMotor m : intake){
+            m.setPower(Range.clip(p, -1.0f, 1.0f));
         }
     }
 }

@@ -102,7 +102,8 @@ public class Auto1 extends LinearOpMode {
         switch (currentState){
             case GO:
                 if (currentPos != null) {
-                VectorF steering = currentPos.subtracted(currentTarget).normalized3D();
+                VectorF steering3d = currentPos.subtracted(currentTarget).normalized3D();
+                VectorF steering = new VectorF(steering3d.get(0), steering3d.get(1));
                 bot.go(steering);
             }
 
