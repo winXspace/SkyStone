@@ -56,6 +56,9 @@ public class Bot {
         intake = new ArrayList<>();
         intake.add(hardwareMap.get(DcMotor.class, "m21"));
         intake.add(hardwareMap.get(DcMotor.class, "m22"));
+        for(DcMotor m : intake){ m.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);}
+        intake.get(0).setDirection(DcMotorSimple.Direction.FORWARD);
+        intake.get(1).setDirection(DcMotorSimple.Direction.REVERSE);
 
     }
 
@@ -69,10 +72,9 @@ public class Bot {
             p *= 0.2;// ATTENTION: намеренно уменьшаем скорость в целях дебага... TODO: убрать эту строчку
             d.motor.setPower(Range.clip(p, -1.0f, 1.0f));
         }
-
-
     }
 
+    // stop the robot
     public void stop() {
         for(Data d : chassis){
             d.motor.setPower(0);
