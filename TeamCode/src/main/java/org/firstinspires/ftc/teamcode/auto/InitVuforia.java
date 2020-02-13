@@ -9,6 +9,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
+import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
@@ -23,7 +24,7 @@ public class InitVuforia {
 
 
     private static final float mmPerInch        = 25.4f;
-    private static final float mmTargetHeight   = (6) * mmPerInch;          // the height of the center of the target image above the floor
+    private static final float mmTargetHeight   = 152.4f;// (6) * mmPerInch;// the height of the center of the target image above the floor
 
     // Constant for Stone Target
     private static final float stoneZ = 2.00f * mmPerInch;
@@ -39,8 +40,11 @@ public class InitVuforia {
     private static final float halfField = 1828.8f;//72 * mmPerInch;
     private static final float quadField  = 914.4f;//36 * mmPerInch;
 
+    private static VuforiaTrackables targetsSkyStone;
+    private static List<VuforiaTrackable> allTrackables = new ArrayList<VuforiaTrackable>();
 
-    public static Pair<VuforiaLocalizer, List<VuforiaTrackable>> initVuforia(int cameraMonitorViewId ) {
+
+    public static VuforiaLocalizer initVuforia(int cameraMonitorViewId ) {
 
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
 
@@ -49,11 +53,11 @@ public class InitVuforia {
 
         VuforiaLocalizer vuforia = ClassFactory.getInstance().createVuforia(parameters);
 
-        List<VuforiaTrackable> allTrackables = new ArrayList<VuforiaTrackable>();
 
 
 
-        VuforiaTrackables targetsSkyStone = vuforia.loadTrackablesFromAsset("Skystone");
+
+        targetsSkyStone = vuforia.loadTrackablesFromAsset("Skystone");
 
         VuforiaTrackable stoneTarget = targetsSkyStone.get(0);
         stoneTarget.setName("Stone Target");
@@ -143,8 +147,8 @@ public class InitVuforia {
 
 
         front1.setLocation(OpenGLMatrix
-                .translation(0, 0, mmTargetHeight)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES,
+                .translation(0, 0, mmTargetHeight)// в центре
+                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES,// ориентация как у blue1/blue2
                         90, // повернули вокруг оси X на 90 градусов, по правиу буравчика
                         0 ,
                         0)));
@@ -196,10 +200,33 @@ public class InitVuforia {
             ((VuforiaTrackableDefaultListener) trackable.getListener()).setPhoneInformation(robotFromCamera, parameters.cameraDirection);
         }
 
-
         targetsSkyStone.activate();
 
-        return new Pair<>(vuforia, allTrackables) ;
+        return vuforia;
     }
+
+    private static VectorF lastPos;
+
+    public static VectorF readPos(){
+        for (VuforiaTrackable trackable : allTrackables) {
+            VuforiaTrackableDefaultListener l = (VuforiaTrackableDefaultListener)trackable.getListener();
+            if (l.isVisible()){
+
+                OpenGLMatrix loc = l.getUpdatedRobotLocation();
+                if (loc != null) {
+                    lastPos = loc.getTranslation();
+                }
+                break;// нашли первый видимый
+            }
+        }
+        return lastPos;
+    }
+
+    public static void deactivate(){
+        if (targetsSkyStone != null){
+            targetsSkyStone.deactivate();
+        }
+    }
+
 
 }

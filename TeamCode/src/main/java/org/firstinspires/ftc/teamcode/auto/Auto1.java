@@ -15,10 +15,13 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefau
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.firstinspires.ftc.teamcode.auto.InitTF.initTF;
 import static org.firstinspires.ftc.teamcode.auto.InitVuforia.initVuforia;
+import static org.firstinspires.ftc.teamcode.auto.InitVuforia.readPos;
 import static org.firstinspires.ftc.teamcode.auto.Utils.log;
 
 
@@ -33,17 +36,29 @@ enum State{
 public class Auto1 extends LinearOpMode {
 
     private VuforiaLocalizer vuforia;
-    private TFObjectDetector tfod;
+    //private TFObjectDetector tfod;
 
     private State currentState = State.LOCALISE;
-    private VectorF currentTarget;
+    //private VectorF currentTarget;
+
+    private TrajectoryRegulator tr = new TrajectoryRegulator();
+
+    private List<VectorF> squarePath = new ArrayList<>(Arrays.asList(
+            new VectorF(500,-500),
+            new VectorF(500,-1500),
+            new VectorF(-500,-1500),
+            new VectorF(-500,-500)
+    ));
+
+    private List<VectorF> squarePath2 = new ArrayList<>(Arrays.asList(
+            new VectorF(250,-500),
+            new VectorF(250,-1000),
+            new VectorF(-250,-1000),
+            new VectorF(-250,-500)
+    ));
 
     Bot bot;
     //private static final float mmPerInch        = 25.4f;
-
-    private List<VuforiaTrackable> allTrackables;
-    VectorF lastPos;
-    OpenGLMatrix lastLoc;
 
     @Override
     public void runOpMode() {
@@ -51,10 +66,9 @@ public class Auto1 extends LinearOpMode {
         Context ctx = hardwareMap.appContext;
 
         // --- init Vuforia --------
-        Pair<VuforiaLocalizer,List<VuforiaTrackable>> res = initVuforia(
+        vuforia = initVuforia(
                 ctx.getResources().getIdentifier("cameraMonitorViewId", "id", ctx.getPackageName()));
 
-        vuforia = res.first; allTrackables = res.second;
 
         // --- init TensorFlow -----
 //        tfod = initTF(
@@ -81,7 +95,7 @@ public class Auto1 extends LinearOpMode {
                 currentState = nextState(input, currentState);
                 log("CurrState:", currentState);
 
-                //writeOutput(currentTarget, input.pos, currentState );
+                writeOutput( input.pos, currentState );
 
 
 
@@ -90,21 +104,17 @@ public class Auto1 extends LinearOpMode {
             }
         }
 
-        if (tfod != null) {
-            tfod.shutdown();
-        }
-
-        //TODO: Vuforial.deactivate();
+        InitTF.shotdown();
+        InitVuforia.deactivate();
     }
 
-    private void writeOutput(VectorF currentTarget, VectorF currentPos, State currentState) {
+    private void writeOutput(VectorF currentPos, State currentState) {
 
         switch (currentState){
             case GO:
                 if (currentPos != null) {
-                VectorF steering3d = currentPos.subtracted(currentTarget).normalized3D();
-                VectorF steering = new VectorF(steering3d.get(0), steering3d.get(1));
-                bot.go(steering);
+
+                bot.go(tr.getVelocity(currentPos));
             }
 
                 break;
@@ -123,7 +133,8 @@ public class Auto1 extends LinearOpMode {
         switch (currentState){
             case LOCALISE:
                 if(i.pos != null) {
-                    currentTarget = new VectorF(-1500f, -400f, 0);
+                    //currentTarget = new VectorF(0, -100f, 152.4f);
+                    tr.go(squarePath);
                     return State.GO;
                 }
                 else return State.LOCALISE;
@@ -132,11 +143,11 @@ public class Auto1 extends LinearOpMode {
                 if (i.pos == null){
                     return State.LOCALISE;
                 }
-                else if( getDistance(i.pos, currentTarget) < 100f){
+                else if( tr.finished()){
                     return State.STOP;
                 }
                 else {
-                    if (i.pos!= null && currentTarget != null) log("distance:", getDistance(i.pos, currentTarget));
+                    //if (i.pos!= null && currentTarget != null) log("distance:", getDistance(i.pos, currentTarget));
                     return State.GO;
                 }
 
@@ -154,43 +165,12 @@ public class Auto1 extends LinearOpMode {
     private Input readInput(){
         // TF handling
         // DEBUG
-        if (false && tfod != null) {
-            // getUpdatedRecognitions() will return null if no new information is available since
-            // the last time that call was made.
-            List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
-            if (updatedRecognitions != null) {
-                // Временно закомментирую, ибо мешает смотреть лог с меток...
-                //telemetry.addData("# Object Detected", updatedRecognitions.size());
-
-                // step through the list of recognitions and display boundary info.
-                int i = 0;
-                for (Recognition recognition : updatedRecognitions) {
-
-                    telemetry.addData(String.format("label (%d)", i), recognition.getLabel());
-                    telemetry.addData(String.format("  left,top (%d)", i), "%.03f , %.03f",
-                            recognition.getLeft(), recognition.getTop());
-                    telemetry.addData(String.format("  right,bottom (%d)", i), "%.03f , %.03f",
-                            recognition.getRight(), recognition.getBottom());
-                }
-                //telemetry.update();
-            }
-        }
-
+        //List<Recognition> brics = InitTF.getBricks();
 
         // Vuforia handling
-        for (VuforiaTrackable trackable : allTrackables) {
-            VuforiaTrackableDefaultListener l = (VuforiaTrackableDefaultListener)trackable.getListener();
-            if (l.isVisible()){
+        VectorF pos = InitVuforia.readPos();
 
-                OpenGLMatrix loc = l.getUpdatedRobotLocation();
-                if (loc != null) {
-                    lastPos = loc.getTranslation();
-                }
-                break;
-            }
-        }
-
-        return new Input(lastPos);// Это жесть. Будучи получено, оно (lastPos) само апдейтиться....
+        return new Input(pos);// Это жесть. Будучи получено, оно (lastPos) само апдейтиться....
     }
 
 }
