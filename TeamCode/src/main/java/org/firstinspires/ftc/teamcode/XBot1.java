@@ -7,10 +7,13 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp(name="XBot1", group="andrew")
 
 public class XBot1 extends LinearOpMode {
+    Servo servo;
+    double servoPosition = 0.0;
 
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor lfDrive = null;
@@ -19,14 +22,17 @@ public class XBot1 extends LinearOpMode {
     private DcMotor lbDrive = null;
     private DcMotor rbDrive = null;
 
-    private DcMotor ilDrive = null;
-    private DcMotor irDrive = null;
+    //private DcMotor ilDrive = null;
+    //private DcMotor irDrive = null;
 
     private VectorF lf = new VectorF (1.0f, 1.0f);
     private VectorF rf = new VectorF (1.0f, -1.0f);
     private VectorF lb = new VectorF (-1.0f, 1.0f);
     private VectorF rb = new VectorF (-1.0f, -1.0f);
 
+
+
+    private DcMotor liftDrive = null;
 
 
 
@@ -36,10 +42,17 @@ public class XBot1 extends LinearOpMode {
         telemetry.update();
 
         lfDrive = hardwareMap.get(DcMotor.class, "m10");
+        lfDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         rfDrive = hardwareMap.get(DcMotor.class, "m11");
+        rfDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         lbDrive = hardwareMap.get(DcMotor.class, "m12");
+        lbDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         rbDrive = hardwareMap.get(DcMotor.class, "m13");
+        rbDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
 
         lfDrive.setDirection(DcMotor.Direction.REVERSE);
         lbDrive.setDirection(DcMotor.Direction.REVERSE);
@@ -48,13 +61,25 @@ public class XBot1 extends LinearOpMode {
         rbDrive.setDirection(DcMotor.Direction.REVERSE);
 
 
-        // intake
+        liftDrive = hardwareMap.get(DcMotor.class, "m20");
+        liftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        servo = hardwareMap.servo.get("servo");
+
+
+        /*// intake
         ilDrive = hardwareMap.get(DcMotor.class, "m20");
         irDrive = hardwareMap.get(DcMotor.class, "m21");
 
         ilDrive.setDirection(DcMotor.Direction.REVERSE);
         irDrive.setDirection(DcMotor.Direction.FORWARD);
+        */
 
+        //servo
+        servo = hardwareMap.get(Servo.class, "servo");
+        servo.setPosition(servoPosition);
+
+        //servo = hardwareMap.servo.get("servo");
 
 
 
@@ -63,13 +88,28 @@ public class XBot1 extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-            // intake
+          /*  // intake
             float intakeUp = gamepad1.left_bumper ? 1 : 0;
             float intakeDown = gamepad1.right_bumper ? -1 : 0;
             float intake = intakeUp + intakeDown;
 
             ilDrive.setPower(intake);
             irDrive.setPower(intake);
+            */
+
+
+            //lift
+
+            double lift = gamepad2.left_stick_y; //?1:(gamepad1.dpad_down?-1:0);
+            liftDrive.setPower(lift);
+
+
+            //servo
+            double newPos = servoPosition + (gamepad2.right_stick_x)*0.005;
+            servoPosition = Range.clip(newPos, 0.0, 0.5);
+            servo.setPosition(servoPosition);
+            /* servoPosition = gamepad2.right_stick_x;*/
+
 
 
             // movement
