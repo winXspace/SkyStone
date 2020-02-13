@@ -48,6 +48,7 @@ public class Bot {
 
         // lift
         liftDrive = hardwareMap.get(DcMotor.class, "m20");
+        liftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // intake
         //ilDrive = hardwareMap.get(DcMotor.class, "m20");
@@ -59,7 +60,7 @@ public class Bot {
         VectorF steering = new VectorF(steering3d.get(0), steering3d.get(1));
         for(Data d : chassis){
             float p = steering.dotProduct(d.dir);
-            p *= 0.2;
+            p *= 0.2;// ATTENTION: намеренно уменьшаем скорость в целях дебага... TODO: убрать эту строчку
             d.motor.setPower(Range.clip(p, -1.0f, 1.0f));
         }
 

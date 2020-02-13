@@ -1,13 +1,12 @@
 package org.firstinspires.ftc.teamcode.auto;
 
+import android.content.Context;
 import android.util.Pair;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.Telemetry;
+
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
@@ -15,10 +14,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
-import org.firstinspires.ftc.teamcode.MyKeys;
-
 
 import java.util.List;
+
+import static org.firstinspires.ftc.teamcode.auto.InitTF.initTF;
+import static org.firstinspires.ftc.teamcode.auto.InitVuforia.initVuforia;
+import static org.firstinspires.ftc.teamcode.auto.Utils.log;
+
+
 
 enum State{
     LOCALISE,
@@ -28,47 +31,42 @@ enum State{
 
 @Autonomous(name = "Auto1", group = "SLAM")
 public class Auto1 extends LinearOpMode {
-    private static final String TFOD_MODEL_ASSET = "Skystone.tflite";
-    private static final String LABEL_FIRST_ELEMENT = "Stone";
-    private static final String LABEL_SECOND_ELEMENT = "Skystone";
-
-    private static final String VUFORIA_KEY = MyKeys.vuforiaKey;
 
     private VuforiaLocalizer vuforia;
-
     private TFObjectDetector tfod;
+
     private State currentState = State.LOCALISE;
     private VectorF currentTarget;
 
     Bot bot;
+    //private static final float mmPerInch        = 25.4f;
+
+    private List<VuforiaTrackable> allTrackables;
+    VectorF lastPos;
+    OpenGLMatrix lastLoc;
 
     @Override
     public void runOpMode() {
-        int vId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        Pair<VuforiaLocalizer,List<VuforiaTrackable>> res = InitVuforia.initVuforia(vId);
+        Utils.init(telemetry);
+        Context ctx = hardwareMap.appContext;
 
-        vuforia = res.first;
-        allTrackables = res.second;
+        // --- init Vuforia --------
+        Pair<VuforiaLocalizer,List<VuforiaTrackable>> res = initVuforia(
+                ctx.getResources().getIdentifier("cameraMonitorViewId", "id", ctx.getPackageName()));
 
+        vuforia = res.first; allTrackables = res.second;
+
+        // --- init TensorFlow -----
+//        tfod = initTF(
+//                vuforia,
+//                ctx.getResources().getIdentifier("tfodMonitorViewId", "id", ctx.getPackageName()));
+
+        // --- init Bot ------------
         bot = Bot.getInstance(hardwareMap);
 
-        // DEBUG
-        if ( true && ClassFactory.getInstance().canCreateTFObjectDetector()) {
-            initTfod();
-        } else {
-            telemetry.addData("Sorry!", "This device is not compatible with TFOD");
-        }
-
-        if (tfod != null) {
-            tfod.activate();
-        }
-
         /** Wait for the game to begin */
-        telemetry.addData(">", "Press Play to start op mode");
+        log(">", "Press Play to start op mode");
         telemetry.update();
-
-
-
 
 
         waitForStart();
@@ -78,13 +76,12 @@ public class Auto1 extends LinearOpMode {
 
                 Input input = readInput();
 
-                //telemetry.addData("Input.pos:", input.pos.get(0));
+                log("Input.pos:", input);
 
                 currentState = nextState(input, currentState);
+                log("CurrState:", currentState);
 
-                telemetry.addData("CurrState:", currentState);
-
-                writeOutput(currentTarget, input.pos, currentState );
+                //writeOutput(currentTarget, input.pos, currentState );
 
 
 
@@ -96,6 +93,8 @@ public class Auto1 extends LinearOpMode {
         if (tfod != null) {
             tfod.shutdown();
         }
+
+        //TODO: Vuforial.deactivate();
     }
 
     private void writeOutput(VectorF currentTarget, VectorF currentPos, State currentState) {
@@ -133,18 +132,22 @@ public class Auto1 extends LinearOpMode {
                     return State.LOCALISE;
                 }
                 else if( getDistance(i.pos, currentTarget) < 100f){
-                return State.STOP;
+                    return State.STOP;
                 }
-                else return State.GO;
+                else {
+                    if (i.pos!= null && currentTarget != null) log("distance:", getDistance(i.pos, currentTarget));
+                    return State.GO;
+                }
 
         }
+
 
 
         return s;
     }
 
     private float getDistance(VectorF a, VectorF b){
-        return a.subtracted(b).length();
+        return a.subtracted(b).magnitude();
     }
 
     private Input readInput(){
@@ -172,46 +175,23 @@ public class Auto1 extends LinearOpMode {
             }
         }
 
-        VectorF pos = null;
+
         // Vuforia handling
         for (VuforiaTrackable trackable : allTrackables) {
-            //telemetry.addData(trackable.getName(), ((VuforiaTrackableDefaultListener)trackable.getListener()).isVisible() ? "Visible" : "Not Visible");    //
+            VuforiaTrackableDefaultListener l = (VuforiaTrackableDefaultListener)trackable.getListener();
+            if (l.isVisible()){
 
-            OpenGLMatrix location = ((VuforiaTrackableDefaultListener)trackable.getListener()).getUpdatedRobotLocation();
-            if (location!= null) {
-                //pos = location.transform(  new VectorF(0,0,0));
-                pos = location.getTranslation();
-
-                lastPos = pos;
-                telemetry.addData(trackable.getName(), "Виден");
-                telemetry.addData("Pos", location.formatAsTransform());
-
+                OpenGLMatrix loc = l.getUpdatedRobotLocation();
+                if (loc != null) {
+                    lastPos = loc.getTranslation();
+                }
+                break;
             }
         }
 
-        return new Input(pos);
-
+        return new Input(lastPos);// Это жесть. Будучи получено, оно (lastPos) само апдейтиться....
     }
-
-    private void initTfod() {
-        int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
-                "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
-
-        tfodParameters.minimumConfidence = 0.8;
-
-        tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
-        tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_FIRST_ELEMENT, LABEL_SECOND_ELEMENT);
-    }
-
-
-    //private static final float mmPerInch        = 25.4f;
-
-
-    private List<VuforiaTrackable> allTrackables = null;
-    VectorF lastPos = null;
-
-
-
 
 }
+
+
