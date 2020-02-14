@@ -119,8 +119,11 @@ public class XBot1 extends LinearOpMode {
 
 
             //lift servo
-            double newLift = servoP + (gamepad2.dpad_down?-1:0)*0.005;
+            double newLift = servoP + (gamepad2.dpad_down?-1:(gamepad2.dpad_up?1.0:0))*0.005;
+            //double dLift = servoP +   (gamepad2.dpad_up?1:0)*0.005;
+
             servoP = Range.clip(newLift, 0.0, 1.0);
+            s.setPosition(servoP);
 
             // movement
             float rot = gamepad1.right_stick_x;
