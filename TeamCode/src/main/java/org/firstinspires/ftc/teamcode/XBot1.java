@@ -76,10 +76,11 @@ public class XBot1 extends LinearOpMode {
         */
 
         //servo
-        servo = hardwareMap.get(Servo.class, "servo");
+        //servo = hardwareMap.get(Servo.class, "servo");
+        servo = hardwareMap.servo.get("servo");
         servo.setPosition(servoPosition);
 
-        //servo = hardwareMap.servo.get("servo");
+
 
 
 
@@ -114,9 +115,15 @@ public class XBot1 extends LinearOpMode {
 
             // movement
             float rot = gamepad1.right_stick_x;
+            rot *= 0.2;
 
 
             VectorF steering = new VectorF(-gamepad1.left_stick_x, -gamepad1.left_stick_y);// На геймпаде по-дефолту Y-ось с мотрит вниз. Здесь мы делаем наверх...
+
+            float k = gamepad1.left_bumper? 1.0f: 0.2f;
+
+            steering.multiply(k);
+
 
             float lfP = steering.dotProduct(lf) + rot;
             float rfP = steering.dotProduct(rf) + rot;

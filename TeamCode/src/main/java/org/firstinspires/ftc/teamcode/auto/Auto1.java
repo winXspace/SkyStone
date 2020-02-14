@@ -1,6 +1,8 @@
 package org.firstinspires.ftc.teamcode.auto;
 
+
 import android.content.Context;
+import android.hardware.SensorManager;
 import android.util.Pair;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -35,11 +37,8 @@ enum State{
 @Autonomous(name = "Auto1", group = "SLAM")
 public class Auto1 extends LinearOpMode {
 
-    private VuforiaLocalizer vuforia;
-    //private TFObjectDetector tfod;
 
     private State currentState = State.LOCALISE;
-    //private VectorF currentTarget;
 
     private TrajectoryRegulator tr = new TrajectoryRegulator();
 
@@ -58,6 +57,7 @@ public class Auto1 extends LinearOpMode {
     ));
 
     Bot bot;
+    IMU imu;
     //private static final float mmPerInch        = 25.4f;
 
     @Override
@@ -65,8 +65,11 @@ public class Auto1 extends LinearOpMode {
         Utils.init(telemetry);
         Context ctx = hardwareMap.appContext;
 
+        Phone phone = Phone.getInstance(ctx);
+
+
         // --- init Vuforia --------
-        vuforia = initVuforia(
+        VuforiaLocalizer vuforia = initVuforia(
                 ctx.getResources().getIdentifier("cameraMonitorViewId", "id", ctx.getPackageName()));
 
 
@@ -77,6 +80,17 @@ public class Auto1 extends LinearOpMode {
 
         // --- init Bot ------------
         bot = Bot.getInstance(hardwareMap);
+
+        // --- init imu ------------
+        imu = new IMU(hardwareMap);
+        // calibration
+        while (!isStopRequested() && !imu.isCalibrated())
+        {
+            sleep(50);
+            idle();
+        }
+
+
 
         /** Wait for the game to begin */
         log(">", "Press Play to start op mode");
@@ -97,10 +111,7 @@ public class Auto1 extends LinearOpMode {
 
                 writeOutput( input.pos, currentState );
 
-
-
                 telemetry.update();
-
             }
         }
 
@@ -113,8 +124,9 @@ public class Auto1 extends LinearOpMode {
         switch (currentState){
             case GO:
                 if (currentPos != null) {
-
-                bot.go(tr.getVelocity(currentPos));
+                    VectorF steering = tr.getVelocity(currentPos);
+                    //steering.multiply(-1.0f);
+                    bot.go(steering);
             }
 
                 break;
@@ -169,6 +181,8 @@ public class Auto1 extends LinearOpMode {
 
         // Vuforia handling
         VectorF pos = InitVuforia.readPos();
+
+        float phi = imu.getAngle();
 
         return new Input(pos);// Это жесть. Будучи получено, оно (lastPos) само апдейтиться....
     }
