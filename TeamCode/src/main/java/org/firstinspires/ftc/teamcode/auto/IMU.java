@@ -33,8 +33,10 @@ public class IMU {
 
     public float getAngle() {
         Orientation o = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
+        float a = o.secondAngle;
+        a = a > 0 ? a : 360 - a;
         // TODO: найти перпердикулярную земле ось для первого ревхаба. Сейчас допустим что X
 
-        return o.firstAngle;//
+        return o.secondAngle;//
     }
 }

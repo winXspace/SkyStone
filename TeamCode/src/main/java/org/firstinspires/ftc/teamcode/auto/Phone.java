@@ -32,15 +32,21 @@ public class Phone implements SensorEventListener {
 
     }
 
+    private float [] lastVal;
+
     @Override
     public void onSensorChanged(SensorEvent e) {
         log("gyro:", e.values);
-
+        lastVal = e.values;
 
     }
 
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
+    }
+
+    float [] getGyro(){
+        return lastVal;
     }
 }

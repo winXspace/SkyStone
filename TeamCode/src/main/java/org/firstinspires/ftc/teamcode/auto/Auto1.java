@@ -60,12 +60,14 @@ public class Auto1 extends LinearOpMode {
     IMU imu;
     //private static final float mmPerInch        = 25.4f;
 
+    float startPhi;
+
     @Override
     public void runOpMode() {
         Utils.init(telemetry);
         Context ctx = hardwareMap.appContext;
 
-        Phone phone = Phone.getInstance(ctx);
+        //Phone phone = Phone.getInstance(ctx);
 
 
         // --- init Vuforia --------
@@ -90,6 +92,7 @@ public class Auto1 extends LinearOpMode {
             idle();
         }
 
+        startPhi = imu.getAngle();
 
 
         /** Wait for the game to begin */
