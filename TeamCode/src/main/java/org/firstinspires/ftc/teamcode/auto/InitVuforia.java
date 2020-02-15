@@ -24,6 +24,11 @@ public class InitVuforia {
 
 
     private static final float mmPerInch        = 25.4f;
+
+    // Здесь непонятно. Первое значение(5.75 дюйма) в этом документе:https://www.firstinspires.org/sites/default/files/uploads/resource_library/ftc/field-setup-guide.pdf
+    // Второе значение(6 дюймов) - из кода на оффрепозитории..
+    // TODO: уточнить правильное значение...
+    //private static final float mmTargetHeight   = 146f;// (5.75) * mmPerInch;// the height of the center of the target image above the floor
     private static final float mmTargetHeight   = 152.4f;// (6) * mmPerInch;// the height of the center of the target image above the floor
 
     // Constant for Stone Target
@@ -50,6 +55,7 @@ public class InitVuforia {
 
         parameters.vuforiaLicenseKey = MyKeys.vuforiaKey;
         parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
+        //parameters.cameraDirection = VuforiaLocalizer.CameraDirection.FRONT;// Works...
 
         VuforiaLocalizer vuforia = ClassFactory.getInstance().createVuforia(parameters);
 
@@ -182,7 +188,8 @@ public class InitVuforia {
         //--- Задняя камера, лендскейп режим
         float phoneYRotate = -90;// так как у нас задняя камера
         float phoneXRotate = 0;
-        float phoneZRotate = 0;
+        //float phoneZRotate = 0;
+        float phoneZRotate = 180;// сама камера смотрит назад
 
 
         // Next, translate the camera lens to where it is on the robot.

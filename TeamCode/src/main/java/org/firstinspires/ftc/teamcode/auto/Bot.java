@@ -34,13 +34,14 @@ public class Bot {
     }
 
     private Bot(HardwareMap hardwareMap){
-        // chassis
+
+        // chassis in robot's correct frame(FTC)
         chassis = new ArrayList<>(
                 Arrays.asList(
-                        new Data(hardwareMap.get(DcMotor.class, "m10"), new VectorF (1.0f, 1.0f)),
-                        new Data(hardwareMap.get(DcMotor.class, "m11"), new VectorF (1.0f, -1.0f)),
-                        new Data(hardwareMap.get(DcMotor.class, "m12"), new VectorF (-1.0f, 1.0f)),
-                        new Data(hardwareMap.get(DcMotor.class, "m13"), new VectorF (-1.0f, -1.0f))
+                        new Data(hardwareMap.get(DcMotor.class, "m10"), new VectorF (-1.0f, 1.0f)),
+                        new Data(hardwareMap.get(DcMotor.class, "m11"), new VectorF (1.0f, 1.0f)),
+                        new Data(hardwareMap.get(DcMotor.class, "m12"), new VectorF (-1.0f, -1.0f)),
+                        new Data(hardwareMap.get(DcMotor.class, "m13"), new VectorF (1.0f, -1.0f))
         ));
 
         for(Data d : chassis){

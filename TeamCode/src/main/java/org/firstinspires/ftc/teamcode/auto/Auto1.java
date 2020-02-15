@@ -11,6 +11,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
@@ -21,6 +23,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
+import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
 import static org.firstinspires.ftc.teamcode.auto.InitTF.initTF;
 import static org.firstinspires.ftc.teamcode.auto.InitVuforia.initVuforia;
 import static org.firstinspires.ftc.teamcode.auto.InitVuforia.readPos;
@@ -127,9 +131,10 @@ public class Auto1 extends LinearOpMode {
         switch (currentState){
             case GO:
                 if (currentPos != null) {
+                    float startAngle = -90;
                     VectorF steering = tr.getVelocity(currentPos);
-                    //steering.multiply(-1.0f);
-                    bot.go(steering);
+                    OpenGLMatrix m = Orientation.getRotationMatrix(EXTRINSIC, AxesOrder.ZXY, DEGREES, startAngle, 0, 0);
+                    bot.go(m.transform(steering));
             }
 
                 break;

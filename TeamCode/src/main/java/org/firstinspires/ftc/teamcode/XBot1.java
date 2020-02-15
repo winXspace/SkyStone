@@ -1,13 +1,22 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
+import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.teamcode.auto.Utils;
+
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.hardware.Servo;
+
+import static org.firstinspires.ftc.teamcode.auto.Utils.log;
 
 @TeleOp(name="XBot1", group="andrew")
 
@@ -28,11 +37,18 @@ public class XBot1 extends LinearOpMode {
     //private DcMotor ilDrive = null;
     //private DcMotor irDrive = null;
 
-    private VectorF lf = new VectorF (1.0f, 1.0f);
-    private VectorF rf = new VectorF (1.0f, -1.0f);
-    private VectorF lb = new VectorF (-1.0f, 1.0f);
-    private VectorF rb = new VectorF (-1.0f, -1.0f);
+//    in old frame
+//    private VectorF lf = new VectorF (1.0f, 1.0f);
+//    private VectorF rf = new VectorF (1.0f, -1.0f);
+//    private VectorF lb = new VectorF (-1.0f, 1.0f);
+//    private VectorF rb = new VectorF (-1.0f, -1.0f);
 
+
+    // in correct robot's frame
+    private VectorF lf = new VectorF (-1.0f, 1.0f);
+    private VectorF rf = new VectorF (1.0f, 1.0f);
+    private VectorF lb = new VectorF (-1.0f, -1.0f);
+    private VectorF rb = new VectorF (1.0f, -1.0f);
 
 
     private DcMotor liftDrive = null;
@@ -41,6 +57,9 @@ public class XBot1 extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+
+        Utils.init(telemetry);
+
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
@@ -57,11 +76,11 @@ public class XBot1 extends LinearOpMode {
         rbDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
 
-        lfDrive.setDirection(DcMotor.Direction.REVERSE);
-        lbDrive.setDirection(DcMotor.Direction.REVERSE);
+        //lfDrive.setDirection(DcMotor.Direction.REVERSE);
+        //lbDrive.setDirection(DcMotor.Direction.REVERSE);
 
-        rfDrive.setDirection(DcMotor.Direction.REVERSE);
-        rbDrive.setDirection(DcMotor.Direction.REVERSE);
+        //rfDrive.setDirection(DcMotor.Direction.REVERSE);
+        //rbDrive.setDirection(DcMotor.Direction.REVERSE);
 
 
         liftDrive = hardwareMap.get(DcMotor.class, "m20");
@@ -87,6 +106,13 @@ public class XBot1 extends LinearOpMode {
         s = hardwareMap.get(Servo.class, "servo1");
         s.setPosition(servoP);
         //servo = hardwareMap.servo.get("servo");
+
+        OpenGLMatrix gamePadToRobotTrans = OpenGLMatrix
+                .identityMatrix()
+                .scaled(1,-1,1)
+                .rotated(AxesReference.EXTRINSIC, AxesOrder.ZXY, AngleUnit.DEGREES,90, 0,0)
+
+                ;
 
 
 
@@ -120,21 +146,41 @@ public class XBot1 extends LinearOpMode {
 
             //lift servo
             double newLift = servoP + (gamepad2.dpad_down?-1:(gamepad2.dpad_up?1.0:0))*0.005;
-            //double dLift = servoP +   (gamepad2.dpad_up?1:0)*0.005;
+
 
             servoP = Range.clip(newLift, 0.0, 1.0);
             s.setPosition(servoP);
 
             // movement
-            float rot = gamepad1.right_stick_x;
+            float k = gamepad1.left_bumper?1.0f:0.2f;
+
+            float rot = k * gamepad1.right_stick_x;
+
+            // vector in gamepad coords
+            VectorF _steering = new VectorF(gamepad1.left_stick_x, gamepad1.left_stick_y, 0);
+            VectorF steering3d = gamePadToRobotTrans.transform(_steering);// vector in robot coords
+            VectorF steering = new VectorF(steering3d.get(0), steering3d.get(1));// 2d
+
+            steering.multiply(k);
 
 
-            VectorF steering = new VectorF(-gamepad1.left_stick_x, -gamepad1.left_stick_y);// На геймпаде по-дефолту Y-ось с мотрит вниз. Здесь мы делаем наверх...
+            //log("steering:", steering);
+
 
             float lfP = steering.dotProduct(lf) + rot;
             float rfP = steering.dotProduct(rf) + rot;
             float lbP = steering.dotProduct(lb) + rot;
             float rbP = steering.dotProduct(rb) + rot;
+
+
+
+//
+//            float lfP = lf.dotProduct(steering) + rot;
+//            float rfP = rf.dotProduct(steering) + rot;
+//            float lbP = lb.dotProduct(steering) + rot;
+//            float rbP = rb.dotProduct(steering) + rot;
+
+
 
 
             lfP = Range.clip(lfP, -1.0f, 1.0f) ;

@@ -9,6 +9,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
+import static org.firstinspires.ftc.teamcode.auto.Utils.log;
+
 public class IMU {
     BNO055IMU imu;
     IMU(HardwareMap hardwareMap){
@@ -33,10 +35,12 @@ public class IMU {
 
     public float getAngle() {
         Orientation o = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.XYZ, AngleUnit.DEGREES);
+        // Нам нужна ось Y.
         float a = o.secondAngle;
-        a = a > 0 ? a : 360 - a;
-        // TODO: найти перпердикулярную земле ось для первого ревхаба. Сейчас допустим что X
+        log("o.secondAngle:", o.secondAngle);
+        a = a >= 0 ? a : 360 + a;// здесь есть ошибка датчика при a = 180;
 
-        return o.secondAngle;//
+
+        return a;//
     }
 }
