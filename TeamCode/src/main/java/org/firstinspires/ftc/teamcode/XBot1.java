@@ -154,7 +154,7 @@ public class XBot1 extends LinearOpMode {
             // movement
             float k = gamepad1.left_bumper?1.0f:0.2f;
 
-            float rot = k * gamepad1.right_stick_x;
+            float rot = k * -gamepad1.right_stick_x;
 
             // vector in gamepad coords
             VectorF _steering = new VectorF(gamepad1.left_stick_x, gamepad1.left_stick_y, 0);
@@ -183,10 +183,10 @@ public class XBot1 extends LinearOpMode {
 
 
 
-            lfP = Range.clip(lfP, -1.0f, 1.0f) ;
-            rfP = Range.clip(rfP, -1.0f, 1.0f) ;
-            lbP = Range.clip(lbP, -1.0f, 1.0f) ;
-            rbP = Range.clip(rbP, -1.0f, 1.0f) ;
+            lfP = Range.clip(lfP, -1.0f, 1.0f);
+            rfP = Range.clip(rfP, -1.0f, 1.0f);
+            lbP = Range.clip(lbP, -1.0f, 1.0f);
+            rbP = Range.clip(rbP, -1.0f, 1.0f);
 
 
             lfDrive.setPower(lfP);

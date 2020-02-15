@@ -11,7 +11,9 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
@@ -53,11 +55,10 @@ public class Auto1 extends LinearOpMode {
             new VectorF(-500,-500)
     ));
 
-    private List<VectorF> squarePath2 = new ArrayList<>(Arrays.asList(
-            new VectorF(250,-500),
-            new VectorF(250,-1000),
-            new VectorF(-250,-1000),
-            new VectorF(-250,-500)
+    private List<VectorF> triPath2 = new ArrayList<>(Arrays.asList(
+            new VectorF(0,-1000),
+            new VectorF(1000,-1500),
+            new VectorF(-1000,-1500)
     ));
 
     Bot bot;
@@ -98,6 +99,13 @@ public class Auto1 extends LinearOpMode {
 
         startPhi = imu.getAngle();
 
+        OpenGLMatrix gamePadToRobotTrans = OpenGLMatrix
+                .identityMatrix()
+                .scaled(1,-1,1)
+                .rotated(AxesReference.EXTRINSIC, AxesOrder.ZXY, AngleUnit.DEGREES,90, 0,0)
+
+                ;
+
 
         /** Wait for the game to begin */
         log(">", "Press Play to start op mode");
@@ -110,11 +118,17 @@ public class Auto1 extends LinearOpMode {
             while (opModeIsActive()) {
 
                 Input input = readInput();
-
                 log("Input.pos:", input);
 
                 currentState = nextState(input, currentState);
                 log("CurrState:", currentState);
+
+                //debug
+                //VectorF _s = new VectorF(gamepad1.left_stick_x, gamepad1.left_stick_y, 0);
+                //VectorF s = gamePadToRobotTrans.transform(_s);
+                //bot.go(new VectorF(s.get(0), s.get(1)));
+
+
 
                 writeOutput( input.pos, currentState );
 
@@ -131,21 +145,21 @@ public class Auto1 extends LinearOpMode {
         switch (currentState){
             case GO:
                 if (currentPos != null) {
-                    float startAngle = -90;
-                    VectorF steering = tr.getVelocity(currentPos);
-                    OpenGLMatrix m = Orientation.getRotationMatrix(EXTRINSIC, AxesOrder.ZXY, DEGREES, startAngle, 0, 0);
-                    bot.go(m.transform(steering));
+                    float startAngle = -90;// correct
+                    //float startAngle = 90;// incorrect!
+                    VectorF _steering = tr.getVelocity(currentPos);// в координатах поля
+                    VectorF steering = new VectorF(_steering.get(0), _steering.get(1), 0);
+                    OpenGLMatrix _m = Orientation.getRotationMatrix(EXTRINSIC, AxesOrder.ZXY, DEGREES, startAngle, 0, 0);
+                    //OpenGLMatrix m = _m.inverted();
+                    VectorF s = _m.transform(steering);
+                    bot.go(new VectorF(s.get(0),s.get(1)));
             }
 
                 break;
             case STOP:
             case LOCALISE:
                 bot.stop();
-
         }
-
-
-
     }
 
     private State nextState(Input i/*may be null*/, State s){
@@ -154,7 +168,7 @@ public class Auto1 extends LinearOpMode {
             case LOCALISE:
                 if(i.pos != null) {
                     //currentTarget = new VectorF(0, -100f, 152.4f);
-                    tr.go(squarePath);
+                    tr.go(triPath2);
                     return State.GO;
                 }
                 else return State.LOCALISE;

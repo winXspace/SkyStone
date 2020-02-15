@@ -46,7 +46,6 @@ public class Bot {
 
         for(Data d : chassis){
             d.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            d.motor.setDirection(DcMotorSimple.Direction.REVERSE);
         }
 
         // lift
