@@ -134,15 +134,18 @@ public class InitVuforia {
 
 
 
-        //red2.setLocation(OpenGLMatrix
-        //      .translation(-quadField, -halfField, mmTargetHeight)
-        //    .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, 180)));
-
-        // Повесим Red2 временно в центр системы координат(центр поля). Ориентация картинки - прежняя..
         red2.setLocation(OpenGLMatrix
-                .translation( 0, 0, mmTargetHeight)
+                .translation(-quadField, -halfField, mmTargetHeight)
                 .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, 90, 0, 180)));
 
+        // Повесим Red2 временно в центр системы координат(центр поля). Ориентация картинки - прежняя..
+//        red2.setLocation(OpenGLMatrix
+//                .translation( 0, 0, mmTargetHeight)
+//                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES,
+//                        90,
+//                        0,
+//                        0)));
+//
 
 
 
@@ -212,22 +215,46 @@ public class InitVuforia {
         return vuforia;
     }
 
-    private static VectorF lastPos;
+    private static OpenGLMatrix lastLoc;
 
-    public static VectorF readPos(){
+    public static OpenGLMatrix readLoc(){
         for (VuforiaTrackable trackable : allTrackables) {
             VuforiaTrackableDefaultListener l = (VuforiaTrackableDefaultListener)trackable.getListener();
             if (l.isVisible()){
 
                 OpenGLMatrix loc = l.getUpdatedRobotLocation();
                 if (loc != null) {
-                    lastPos = loc.getTranslation();
+                    lastLoc = loc;
                 }
                 break;// нашли первый видимый
             }
         }
-        return lastPos;
+        return lastLoc;
     }
+
+    public static VectorF readPos(){
+        OpenGLMatrix loc = readLoc();
+        if (loc != null){
+            return loc.getTranslation();
+        }else {
+            return null;
+        }
+
+    }
+
+    public static float readAngle(){
+        OpenGLMatrix loc = readLoc();
+        if (loc != null){
+            Orientation rot = Orientation.getOrientation(loc, EXTRINSIC, XYZ, DEGREES);
+            return rot.thirdAngle;
+        }else {
+            return 0;// holly shit! TODO: refactor to use kind of maybe type or ideomatic andorid @Nullable annotaition...
+        }
+
+
+    }
+
+
 
     public static void deactivate(){
         if (targetsSkyStone != null){

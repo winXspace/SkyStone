@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
+import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.EXTRINSIC;
 import static org.firstinspires.ftc.teamcode.auto.InitTF.initTF;
 import static org.firstinspires.ftc.teamcode.auto.InitVuforia.initVuforia;
@@ -43,23 +44,49 @@ enum State{
 @Autonomous(name = "Auto1", group = "SLAM")
 public class Auto1 extends LinearOpMode {
 
+    public float startAngle;
+
 
     private State currentState = State.LOCALISE;
 
     private TrajectoryRegulator tr = new TrajectoryRegulator();
 
-    private List<VectorF> squarePath = new ArrayList<>(Arrays.asList(
+    // Constants for perimeter targets
+    private static final float halfField = 1828.8f;
+    private static final float quadField  = 914.4f;
+
+    protected List<VectorF> squarePath = new ArrayList<>(Arrays.asList(
             new VectorF(500,-500),
             new VectorF(500,-1500),
             new VectorF(-500,-1500),
             new VectorF(-500,-500)
     ));
 
-    private List<VectorF> triPath2 = new ArrayList<>(Arrays.asList(
+    protected List<VectorF> triPath2 = new ArrayList<>(Arrays.asList(
             new VectorF(0,-1000),
             new VectorF(1000,-1500),
             new VectorF(-1000,-1500)
     ));
+
+    protected List<VectorF> path4 = new ArrayList<>(Arrays.asList(
+            new VectorF(0,-1000),
+            new VectorF(1000,-1500),
+            new VectorF(-1000,-1500)
+    ));
+
+
+
+    protected List<VectorF> redBridge = new ArrayList<>(Arrays.asList(
+            new VectorF(0,-halfField + 450)
+    ));
+
+
+    protected List<VectorF> blueBridge = new ArrayList<>(Arrays.asList(
+            new VectorF(0,halfField - 450)
+    ));
+
+    protected List<VectorF> bridgeTarget;
+
 
     Bot bot;
     IMU imu;
@@ -130,7 +157,7 @@ public class Auto1 extends LinearOpMode {
 
 
 
-                writeOutput( input.pos, currentState );
+                writeOutput( input.pos, input.angle, currentState );
 
                 telemetry.update();
             }
@@ -140,7 +167,7 @@ public class Auto1 extends LinearOpMode {
         InitVuforia.deactivate();
     }
 
-    private void writeOutput(VectorF currentPos, State currentState) {
+    private void writeOutput(VectorF currentPos, float currentAngle,  State currentState) {
 
         switch (currentState){
             case GO:
@@ -202,11 +229,13 @@ public class Auto1 extends LinearOpMode {
         //List<Recognition> brics = InitTF.getBricks();
 
         // Vuforia handling
-        VectorF pos = InitVuforia.readPos();
+        OpenGLMatrix loc = InitVuforia.readLoc();
+        VectorF pos = loc.getTranslation();
+        Orientation rot = Orientation.getOrientation(loc, EXTRINSIC, XYZ, DEGREES);
 
-        float phi = imu.getAngle();
+        //float phi = imu.getAngle();
 
-        return new Input(pos);// Это жесть. Будучи получено, оно (lastPos) само апдейтиться....
+        return new Input(pos, rot.thirdAngle);// Это жесть. Будучи получено, оно (lastPos) само апдейтиться....
     }
 
 }

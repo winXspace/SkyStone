@@ -173,16 +173,6 @@ public class XBot1 extends LinearOpMode {
             float rbP = steering.dotProduct(rb) + rot;
 
 
-
-//
-//            float lfP = lf.dotProduct(steering) + rot;
-//            float rfP = rf.dotProduct(steering) + rot;
-//            float lbP = lb.dotProduct(steering) + rot;
-//            float rbP = rb.dotProduct(steering) + rot;
-
-
-
-
             lfP = Range.clip(lfP, -1.0f, 1.0f);
             rfP = Range.clip(rfP, -1.0f, 1.0f);
             lbP = Range.clip(lbP, -1.0f, 1.0f);

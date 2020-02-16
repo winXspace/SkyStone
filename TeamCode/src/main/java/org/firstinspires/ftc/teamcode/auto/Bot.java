@@ -74,6 +74,17 @@ public class Bot {
         }
     }
 
+    public void goAndRot(VectorF steering, float dA){
+        for(Data d : chassis){
+            float p = steering.dotProduct(d.dir) + dA;
+            p *= 0.2;// ATTENTION: намеренно уменьшаем скорость в целях дебага... TODO: убрать эту строчку
+            d.motor.setPower(Range.clip(p, -1.0f, 1.0f));
+        }
+    }
+
+
+
+
     // stop the robot
     public void stop() {
         for(Data d : chassis){
