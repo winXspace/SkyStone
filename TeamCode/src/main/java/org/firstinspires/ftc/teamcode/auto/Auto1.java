@@ -178,8 +178,12 @@ public class Auto1 extends LinearOpMode {
                     VectorF steering = new VectorF(_steering.get(0), _steering.get(1), 0);
                     OpenGLMatrix _m = Orientation.getRotationMatrix(EXTRINSIC, AxesOrder.ZXY, DEGREES, startAngle, 0, 0);
                     //OpenGLMatrix m = _m.inverted();
-                    VectorF s = _m.transform(steering);
-                    bot.go(new VectorF(s.get(0),s.get(1)));
+                    VectorF _s = _m.transform(steering);
+                    VectorF s = new VectorF(_s.get(0),_s.get(1));
+                    float a = currentAngle - startAngle;
+
+                    //bot.go();
+                    bot.goAndRot(s, a);
             }
 
                 break;
