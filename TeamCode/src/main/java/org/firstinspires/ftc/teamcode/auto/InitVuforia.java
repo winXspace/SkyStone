@@ -51,7 +51,8 @@ public class InitVuforia {
 
     public static VuforiaLocalizer initVuforia(int cameraMonitorViewId ) {
 
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+        //VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
+        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
 
         parameters.vuforiaLicenseKey = MyKeys.vuforiaKey;
         parameters.cameraDirection = VuforiaLocalizer.CameraDirection.BACK;
@@ -61,7 +62,7 @@ public class InitVuforia {
 
 
 
-
+/*
 
         targetsSkyStone = vuforia.loadTrackablesFromAsset("Skystone");
 
@@ -191,27 +192,29 @@ public class InitVuforia {
         //--- Задняя камера, лендскейп режим
         float phoneYRotate = -90;// так как у нас задняя камера
         float phoneXRotate = 0;
-        //float phoneZRotate = 0;
-        float phoneZRotate = 180;// сама камера смотрит назад
+        float phoneZRotate = 0;
+        //float phoneZRotate = 180;// сама камера смотрит назад
 
 
         // Next, translate the camera lens to where it is on the robot.
-        // In this example, it is centered (left to right), but forward of the middle of the robot, and above ground level.
-        final float CAMERA_FORWARD_DISPLACEMENT  = 0;
-        final float CAMERA_VERTICAL_DISPLACEMENT = 30.0f; // 30 мм над землёй
-        final float CAMERA_LEFT_DISPLACEMENT     = 0;     // eg: Camera is ON the robot's center line
+        final float CAMERA_FORWARD_DISPLACEMENT  = 80f;
+        final float CAMERA_VERTICAL_DISPLACEMENT = 115.0f; // 30 мм над землёй
+        final float CAMERA_LEFT_DISPLACEMENT     = 90f;
 
         OpenGLMatrix robotFromCamera = OpenGLMatrix
                 .translation(CAMERA_FORWARD_DISPLACEMENT, CAMERA_LEFT_DISPLACEMENT, CAMERA_VERTICAL_DISPLACEMENT)
                 .multiplied(Orientation.getRotationMatrix(EXTRINSIC, YZX, DEGREES, phoneYRotate, phoneZRotate, phoneXRotate));
 
-        /**  Let all the trackable listeners know where the phone is.  */
+
         for (VuforiaTrackable trackable : allTrackables) {
             ((VuforiaTrackableDefaultListener) trackable.getListener()).setPhoneInformation(robotFromCamera, parameters.cameraDirection);
         }
 
         targetsSkyStone.activate();
 
+
+
+        */
         return vuforia;
     }
 

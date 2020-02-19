@@ -31,7 +31,7 @@ public class TrajectoryRegulator {
         float d = e.magnitude();
         log("d:", d);
         log("currentTarget:", currentTarget);
-        if (d < 50f){
+        if (d < 75f){// пятно радиусом 15mm
             if(iterator.hasNext()){
                 currentTarget = iterator.next();
                 return norm(currentPos.subtracted(currentTarget));

@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.auto;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
@@ -10,9 +11,11 @@ import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import static org.firstinspires.ftc.teamcode.auto.Utils.log;
+
 class Data{
-    public final DcMotor motor;
-    public final VectorF dir;
+    public  DcMotor motor;
+    public  VectorF dir;
 
     public Data(DcMotor motor, VectorF dir){
       this.motor = motor;
@@ -22,7 +25,8 @@ class Data{
 
 public class Bot {
     private static Bot bot;
-    private final DcMotor liftDrive;
+    private final Servo servo1;
+    private DcMotor liftDrive;
     private ArrayList<Data> chassis;
     private ArrayList<DcMotor> intake;
 
@@ -52,6 +56,8 @@ public class Bot {
         liftDrive = hardwareMap.get(DcMotor.class, "m20");
         liftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        servo1 = hardwareMap.servo.get("servo1");
+
         // intake
         intake = new ArrayList<>();
         intake.add(hardwareMap.get(DcMotor.class, "m21"));
@@ -66,22 +72,33 @@ public class Bot {
      * Motion of robot in desired direction
      * @param steering should be 2d vector(not 3d)!
      */
-    public void go(VectorF steering){
+    public void go(VectorF steering, float k){
         for(Data d : chassis){
             float p = steering.dotProduct(d.dir);
-            p *= 0.2;// ATTENTION: намеренно уменьшаем скорость в целях дебага... TODO: убрать эту строчку
-            d.motor.setPower(Range.clip(p, -1.0f, 1.0f));
+            p *= k;// ATTENTION: намеренно уменьшаем скорость в целях дебага... TODO: убрать эту строчку
+            //d.motor.setPower(Range.clip(p, -1.0f, 1.0f));
+            d.motor.setPower(p);
         }
     }
 
-    public void goAndRot(VectorF steering, float dA){
+    public void go(VectorF steering){
+        go(steering, 1);
+    }
+
+    public void goAndRot(VectorF steering, float dA, float k){
         for(Data d : chassis){
             float p = steering.dotProduct(d.dir) + dA;
-            p *= 0.2;// ATTENTION: намеренно уменьшаем скорость в целях дебага... TODO: убрать эту строчку
+            p *= k;// ATTENTION: намеренно уменьшаем скорость в целях дебага... TODO: убрать эту строчку
             d.motor.setPower(Range.clip(p, -1.0f, 1.0f));
         }
     }
 
+    public void rot(float p){
+        for(Data d : chassis){
+            d.motor.setPower(p);
+
+        }
+    }
 
 
 
@@ -91,6 +108,12 @@ public class Bot {
             d.motor.setPower(0);
         }
     }
+
+
+    public void servoSet(float a){
+        servo1.setPosition(a);
+    }
+
 
     // lifting the brick
     public void lift(double p){
