@@ -27,6 +27,7 @@ public class AutoTimeRed extends LinearOpMode {
 
         bot.go( new VectorF(1.0f, 0) );
 
+        // первое движение
         runtime.reset();
         while (opModeIsActive() && (runtime.seconds() < 0.5)) {
             telemetry.addData("Path", "Leg 1: %2.5f S Elapsed", runtime.seconds());
@@ -35,7 +36,7 @@ public class AutoTimeRed extends LinearOpMode {
 
 
 
-
+        // второе движение
         float t = 3.5f;
         bot.go( dir );
 
