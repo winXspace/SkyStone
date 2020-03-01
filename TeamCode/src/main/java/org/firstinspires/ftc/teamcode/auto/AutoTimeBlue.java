@@ -8,7 +8,7 @@ import org.firstinspires.ftc.robotcore.external.matrices.VectorF;
 public class AutoTimeBlue extends AutoTimeRed {
     @Override
     public void runOpMode() {
-        dir = new VectorF(0.0f, 1.0f);
+        dir = new VectorF(0.8f, 1.0f);
         super.runOpMode();
     }
 }
