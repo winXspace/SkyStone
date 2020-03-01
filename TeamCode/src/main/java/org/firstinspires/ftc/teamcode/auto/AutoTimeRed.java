@@ -46,6 +46,8 @@ public class AutoTimeRed extends LinearOpMode {
             telemetry.update();
         }
 
+        bot.stop();
+
 
         telemetry.addData("Path", "Complete");
         telemetry.update();
