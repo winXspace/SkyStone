@@ -298,6 +298,7 @@ public class Auto1 extends LinearOpMode {
 
                     //bot.go(s);
                     //bot.rot(-a * 0.01f);
+
                     bot.goAndRot(s, -a * 0.1f, 0.2f);
                 }
 

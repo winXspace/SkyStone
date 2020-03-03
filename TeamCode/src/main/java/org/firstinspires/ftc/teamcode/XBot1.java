@@ -53,6 +53,9 @@ public class XBot1 extends LinearOpMode {
 
     private DcMotor liftDrive = null;
 
+    private DcMotor bdr = null;
+
+
 
 
     @Override
@@ -85,6 +88,11 @@ public class XBot1 extends LinearOpMode {
 
         liftDrive = hardwareMap.get(DcMotor.class, "m20");
         liftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        bdr = hardwareMap.get(DcMotor.class, "m21");
+        bdr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+
 
         servo = hardwareMap.servo.get("servo");
 
@@ -125,7 +133,7 @@ public class XBot1 extends LinearOpMode {
             float intakeUp = gamepad1.left_bumper ? 1 : 0;
             float intakeDown = gamepad1.right_bumper ? -1 : 0;
             float intake = intakeUp + intakeDown;
-
+ 
             ilDrive.setPower(intake);
             irDrive.setPower(intake);
             */
@@ -138,10 +146,14 @@ public class XBot1 extends LinearOpMode {
 
 
             //servo
-            double newPos = servoPosition + (gamepad2.right_stick_x)*0.005;
+            /*double newPos = servoPosition + (gamepad2.right_stick_x)*0.005;
             servoPosition = Range.clip(newPos, 0.0, 0.5);
-            servo.setPosition(servoPosition);
+            servo.setPosition(servoPosition);*/
             /* servoPosition = gamepad2.right_stick_x;*/
+
+            //bdr
+            double backw = gamepad2.right_stick_x; //?1:(gamepad.dpad_down?-1:0);
+            bdr.setPower(backw);
 
 
             //lift servo
