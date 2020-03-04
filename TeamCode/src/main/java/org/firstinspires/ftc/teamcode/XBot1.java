@@ -133,7 +133,7 @@ public class XBot1 extends LinearOpMode {
             float intakeUp = gamepad1.left_bumper ? 1 : 0;
             float intakeDown = gamepad1.right_bumper ? -1 : 0;
             float intake = intakeUp + intakeDown;
- 
+
             ilDrive.setPower(intake);
             irDrive.setPower(intake);
             */
@@ -152,7 +152,7 @@ public class XBot1 extends LinearOpMode {
             /* servoPosition = gamepad2.right_stick_x;*/
 
             //bdr
-            double backw = gamepad2.right_stick_x; //?1:(gamepad.dpad_down?-1:0);
+            double backw = gamepad2.right_stick_x * 0.1; //?1:(gamepad.dpad_down?-1:0);
             bdr.setPower(backw);
 
 
