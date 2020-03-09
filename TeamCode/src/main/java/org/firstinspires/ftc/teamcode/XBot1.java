@@ -54,6 +54,7 @@ public class XBot1 extends LinearOpMode {
     private DcMotor liftDrive = null;
 
     private DcMotor bdr = null;
+    private DcMotor bdr1 = null;
 
 
 
@@ -63,7 +64,7 @@ public class XBot1 extends LinearOpMode {
 
         Utils.init(telemetry);
 
-        telemetry.addData("Status", "Initialized");
+        telemetry.addData("Status","Initialized");
         telemetry.update();
 
         lfDrive = hardwareMap.get(DcMotor.class, "m10");
@@ -91,6 +92,9 @@ public class XBot1 extends LinearOpMode {
 
         bdr = hardwareMap.get(DcMotor.class, "m21");
         bdr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        bdr1 = hardwareMap.get(DcMotor.class, "m22");
+        bdr1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
 
 
@@ -152,8 +156,10 @@ public class XBot1 extends LinearOpMode {
             /* servoPosition = gamepad2.right_stick_x;*/
 
             //bdr
-            double backw = gamepad2.right_stick_x * 0.1; //?1:(gamepad.dpad_down?-1:0);
+            double backw = gamepad2.right_stick_x * 0.2; //?1:(gamepad.dpad_down?-1:0);
             bdr.setPower(backw);
+            bdr1.setPower(-backw);
+
 
 
             //lift servo
